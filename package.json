@@ -1,5 +1,5 @@
 {
-  "name": "sax",
+  "name": "@jcsj/sax",
   "description": "An evented streaming XML parser in JavaScript",
   "author": "San Juan, Jean Carlo",
   "version": "1.2.5",
@@ -11,7 +11,10 @@
     "postversion": "npm publish",
     "postpublish": "git push origin --all; git push origin --tags"
   },
-  "repository": "git://github.com/jcmsj/sax-js.git",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jcmsj/sax-js.git"
+  },
   "files": [
     "lib/sax.js",
     "LICENSE",
@@ -25,5 +28,8 @@
     "branches": 75,
     "functions": 86,
     "lines": 79
-  }
+  },
+  "keywords": [
+    "xml","js","parser"
+  ]
 }
