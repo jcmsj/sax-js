@@ -1,15 +1,18 @@
 {
   "name": "@jcsj/sax",
   "description": "An evented streaming XML parser in JavaScript",
-  "author": "San Juan, Jean Carlo",
-  "version": "1.2.5",
+  "version": "1.2.7",
+  "author": {
+    "email": "sanjuan.jeancarlo@gmail.com",
+    "name": "San Juan, Jean Carlo",
+    "url": "https://github.com/jcmsj/"
+  },
   "main": "lib/sax.js",
   "license": "ISC",
   "scripts": {
     "test": "tap test/*.js --cov -j4",
     "preversion": "npm test",
-    "postversion": "npm publish",
-    "postpublish": "git push origin --all; git push origin --tags"
+    "postversion": "npm publish"
   },
   "repository": {
     "type": "git",
