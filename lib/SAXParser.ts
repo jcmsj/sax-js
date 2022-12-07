@@ -675,6 +675,10 @@ export default class SAXParser {
   }
 
   resume() { this.error = undefined; return this }
+
+  getError() {
+    return this.error
+  }
 }
 
 export function closeText(parser: SAXParser) {
