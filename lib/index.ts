@@ -1,7 +1,9 @@
 import { emit } from "./emit";
 import SAXParser from "./SAXParser";
+export { default as SAXParser } from "./SAXParser"
 import { SAXOptions } from "./types";
-export function parser(strict:boolean, opt:SAXOptions) { return new SAXParser(strict, opt) }
+export { type SAXOptions } from "./types";
+export function parser(strict: boolean, opt: SAXOptions) { return new SAXParser(strict, opt) }
 // When we pass the MAX_BUFFER_LENGTH position, start checking for buffer overruns.
 // When we check, schedule the next check for MAX_BUFFER_LENGTH - (max(buffer lengths)),
 // since that's the earliest that a buffer overrun could occur.  This way, checks are
@@ -37,7 +39,7 @@ var streamWraps = EVENTS.filter(function (ev) {
   return ev !== 'error' && ev !== 'end'
 })
 
-export function createStream(strict:boolean, opt:SAXOptions) {
+export function createStream(strict: boolean, opt: SAXOptions) {
   return new SAXStream(strict, opt)
 }
 
@@ -50,7 +52,7 @@ class SAXStream extends ReadableStream {
   readable: boolean;
   _decoder: TextDecoder;
 
-  constructor(strict:boolean, opt:SAXOptions) {
+  constructor(strict: boolean, opt: SAXOptions) {
     super();//Defaults works
 
     //IDK what this is for
@@ -64,7 +66,7 @@ class SAXStream extends ReadableStream {
     this._parser.onend = () => emit(this._parser, 'end');
 
     this._parser.onerror = er => {
-      emit(this._parser,'error', er);
+      emit(this._parser, 'error', er);
       // if didn't throw, then means error was handled.
       // go ahead and clear error, so we can write again.
       this._parser.error = null;
@@ -91,13 +93,13 @@ class SAXStream extends ReadableStream {
     });
   }
 
-  write(data:ArrayBuffer): boolean {
+  write(data: ArrayBuffer): boolean {
     /* if (typeof Buffer === 'function' &&
       typeof Buffer.isBuffer === 'function' &&
       Buffer.isBuffer(data)) { */
     if (data instanceof ArrayBuffer && !this._decoder) {
       if (!this._decoder) {
-        this._decoder =  new TextDecoder();
+        this._decoder = new TextDecoder();
       }
       data = this._decoder.decode(data);
     }
@@ -116,7 +118,7 @@ class SAXStream extends ReadableStream {
     this._parser.end();
     return true;
   }
-  on(ev:string, handler:Function) {
+  on(ev: string, handler: Function) {
     if (!this._parser['on' + ev] && streamWraps.includes(ev)) {
       this._parser['on' + ev] = function () {
         //const args = arguments.length === 1 ? [arguments[0]] : Array.apply(null, arguments);
@@ -125,7 +127,7 @@ class SAXStream extends ReadableStream {
         this._parser.emit(this._parser, [ev, ...arguments])
       };
     }
-    
+
     //return super.on(this._parser, ev, handler)
     //return Stream.prototype.on.call(me, ev, handler);
   }

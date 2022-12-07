@@ -7,7 +7,7 @@
     "name": "San Juan, Jean Carlo",
     "url": "https://github.com/jcmsj/"
   },
-  "main": "lib/sax.js",
+  "main": "lib/index",
   "license": "ISC",
   "scripts": {
     "test": "tap test/*.js --cov -j4",
