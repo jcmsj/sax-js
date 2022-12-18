@@ -20,7 +20,7 @@ export default class SAXParser {
   error?: Error;
   strict!: boolean;
   noscript!: boolean;
-  state: any;
+  state!: STATE;
   strictEntities: any;
   ENTITIES: any;
   attribList!: any[];
@@ -61,8 +61,9 @@ export default class SAXParser {
     if (typeof chunk === 'object') {
       chunk = chunk.toString()
     }
-    var i = 0
-    var c = ''
+
+    let i = 0
+    let c = ''
     while (true) {
       c = charAt(chunk, i++)
       this.c = c
@@ -599,7 +600,7 @@ export default class SAXParser {
       (this.state !== STATE.TEXT)) {
       error(this, 'Unexpected end')
     }
-    closeText(this)
+    this.closeText()
     this.c = ''
     this.closed = true
     emit(this, 'onend')
@@ -663,11 +664,20 @@ export default class SAXParser {
   }
 
   closeText() {
-    closeText(this)
+    this.textNode = textopts(this.opt, this.textNode)
+    if (this.textNode) emit(this, 'ontext', this.textNode)
+    this.textNode = ''
   }
 
   flush() {
-    flushBuffers(this)
+    if (this.cdata !== '') {
+      emitNode(this, 'oncdata', this.cdata)
+      this.cdata = ''
+    }
+    if (this.script !== '') {
+      emitNode(this, 'onscript', this.script)
+      this.script = ''
+    }
   }
 
   close() {
@@ -681,22 +691,13 @@ export default class SAXParser {
   }
 }
 
-export function closeText(parser: SAXParser) {
-  parser.textNode = textopts(parser.opt, parser.textNode)
-  if (parser.textNode) emit(parser, 'ontext', parser.textNode)
-  parser.textNode = ''
-}
-
-export function error(p: SAXParser, er: any) {
-  closeText(p)
+export function error(p: SAXParser, error_msg: string) {
+  p.closeText()
   if (p.trackPosition) {
-    er += '\nLine: ' + p.line +
-      '\nColumn: ' + p.column +
-      '\nChar: ' + p.c
+    error_msg += `\nLine: ${p.line}\nColumn: ${p.column}\nChar: ${p.c}`;
   }
-  er = new Error(er)
-  p.error = er
-  emit(p, 'onerror', er)
+  p.error = new Error(error_msg)
+  emit(p, 'onerror', p.error)
   return p
 }
 
@@ -708,7 +709,7 @@ export function textopts(opt: any, s: string) {
 
 export function emitNode(p: SAXParser, nodeType: any, data?: any) {
   if (p.textNode)
-    closeText(p);
+    p.closeText();
   emit(p, nodeType, data);
 }
 
@@ -774,8 +775,8 @@ export function strictFail(p: SAXParser, message: string) {
 
 export function parseEntity(p: SAXParser) {
   let entity = p.entity
-  let entityLC = entity.toLowerCase()
-  let num: number = NaN;
+  const entityLC = entity.toLowerCase()
+  let num = NaN;
   let numStr = ''
 
   if (p.ENTITIES[entity]) {
@@ -785,8 +786,8 @@ export function parseEntity(p: SAXParser) {
     return p.ENTITIES[entityLC]
   }
   entity = entityLC
-  if (entity.charAt(0) === '#') {
-    if (entity.charAt(1) === 'x') {
+  if (entity[0] === '#') {
+    if (entity[1] === 'x') {
       entity = entity.slice(2)
       num = parseInt(entity, 16)
       numStr = num.toString(16)
@@ -806,18 +807,18 @@ export function parseEntity(p: SAXParser) {
 }
 
 function checkBufferLength(p: SAXParser) {
-  const maxAllowed = Math.max(MAX_BUFFER_LENGTH, 10)
-  var maxActual = 0
-  for (let i = 0, l = buffers.length; i < l; i++) {
-    const len = p[buffers[i]].length
-    if (len > maxAllowed) {
+  const MAX_ALLOWED = Math.max(MAX_BUFFER_LENGTH, 10)
+  let max_actual = 0
+  for (const buffer of buffers) {
+    const len = p[buffer].length
+    if (len > MAX_ALLOWED) {
       // Text/cdata nodes can get big, and since they're buffered,
       // we can get here under normal conditions.
       // Avoid issues by emitting the text node now,
       // so at least it won't get any bigger.
-      switch (buffers[i]) {
+      switch (buffer) {
         case 'textNode':
-          closeText(p)
+          p.closeText()
           break
 
         case 'cdata':
@@ -831,12 +832,12 @@ function checkBufferLength(p: SAXParser) {
           break
 
         default:
-          error(p, 'Max buffer length exceeded: ' + buffers[i])
+          error(p, 'Max buffer length exceeded: ' + buffer)
       }
     }
-    maxActual = Math.max(maxActual, len)
+    max_actual = Math.max(max_actual, len)
   }
   // schedule the next check for the earliest possible buffer overrun.
-  const m = MAX_BUFFER_LENGTH - maxActual
+  const m = MAX_BUFFER_LENGTH - max_actual
   p.bufferCheckPosition = m + p.position
 }

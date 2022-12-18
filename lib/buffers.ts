@@ -8,7 +8,7 @@
 // edge case, result in creating at most one complete copy of the string passed in.
 // Set to Infinity to have unlimited buffers.
 
-import SAXParser, { closeText, emitNode, error } from "./SAXParser";
+import SAXParser, { emitNode, error } from "./SAXParser";
 
 export let MAX_BUFFER_LENGTH = 64 * 1024;
 export const buffers = [
@@ -29,7 +29,7 @@ export function checkBufferLength(p:SAXParser) {
       // so at least it won't get any bigger.
       switch (buffer_name) {
         case 'textNode':
-          closeText(p)
+          p.closeText();
           break
 
         case 'cdata':
@@ -56,16 +56,4 @@ export function checkBufferLength(p:SAXParser) {
 
 export function clearBuffers(p:SAXParser) {
   buffers.map(b => p[b] = "");
-}
-
-export function flushBuffers(p:SAXParser) {
-  closeText(p)
-  if (p.cdata !== '') {
-    emitNode(p, 'oncdata', p.cdata)
-    p.cdata = ''
-  }
-  if (p.script !== '') {
-    emitNode(p, 'onscript', p.script)
-    p.script = ''
-  }
 }

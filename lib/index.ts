@@ -97,15 +97,16 @@ class SAXStream extends ReadableStream {
     /* if (typeof Buffer === 'function' &&
       typeof Buffer.isBuffer === 'function' &&
       Buffer.isBuffer(data)) { */
+    let decoded_data =  "";
     if (data instanceof ArrayBuffer && !this._decoder) {
       if (!this._decoder) {
         this._decoder = new TextDecoder();
       }
-      data = this._decoder.decode(data);
+      decoded_data = this._decoder.decode(data);
     }
 
-    this._parser.write(data.toString());
-    emit(this._parser, 'data', data);
+    this._parser.write(decoded_data);
+    emit(this._parser, 'data', decoded_data);
     return true;
   }
   /**
