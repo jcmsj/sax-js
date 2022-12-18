@@ -1,10 +1,10 @@
 export interface SAXOptions {
-    trim?: boolean | undefined;
-    normalize?: boolean | undefined;
-    lowercase?: boolean | undefined;
-    xmlns?: boolean | undefined;
-    noscript?: boolean | undefined;
-    position?: boolean | undefined;
+    trim?: boolean;
+    normalize?: boolean;
+    lowercase?: boolean;
+    xmlns?: boolean;
+    noscript?: boolean;
+    position?: boolean;
 }
 
 export interface QualifiedName {
