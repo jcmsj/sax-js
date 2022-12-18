@@ -4,7 +4,7 @@ import { CDATA, DOCTYPE, rootNS, XMLNS_NAMESPACE, XML_NAMESPACE } from './RootNS
 import { XML_ENTITIES, ENTITIES, isWhitespace, isQuote, isMatch, isAttribEnd, nameStart, entityBody, entityStart, nameBody, notMatch } from './Entities';
 import { charAt } from './charAt';
 import { closeTag, newTag, openTag, qname } from './tag';
-import { buffers, MAX_BUFFER_LENGTH, clearBuffers, flushBuffers } from "./buffers"
+import { buffers, MAX_BUFFER_LENGTH, clearBuffers} from "./buffers"
 import { QualifiedTag, SAXOptions } from "./types";
 export default class SAXParser {
   q!: string;
