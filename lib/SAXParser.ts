@@ -1,5 +1,5 @@
 import { emit } from "./emit";
-import { STATE, S } from "./State"
+import { STATE, STATE as S } from "./State"
 import { CDATA, DOCTYPE, rootNS, XMLNS_NAMESPACE, XML_NAMESPACE } from './RootNS';
 import { XML_ENTITIES, ENTITIES, isWhitespace, isQuote, isMatch, isAttribEnd, nameStart, entityBody, entityStart, nameBody, notMatch } from './Entities';
 import { charAt } from './charAt';

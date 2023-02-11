@@ -7,7 +7,8 @@
     "name": "San Juan, Jean Carlo",
     "url": "https://github.com/jcmsj/"
   },
-  "main": "lib/index",
+  "type": "module",
+  "main": "./lib/index.ts",
   "license": "ISC",
   "scripts": {
     "test": "tap test/*.js --cov -j4",
@@ -19,18 +20,12 @@
     "url": "git://github.com/jcmsj/sax-js.git"
   },
   "files": [
-    "lib/sax.js",
+    "lib/",
     "LICENSE",
     "README.md"
   ],
   "devDependencies": {
     "tap": "^16.3.2"
-  },
-  "tap": {
-    "statements": 79,
-    "branches": 75,
-    "functions": 86,
-    "lines": 79
   },
   "keywords": [
     "xml",

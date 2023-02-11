@@ -37,4 +37,4 @@ export enum STATE {
     SCRIPT_ENDING // <script> ... <
 }
 
-export const S = STATE;
+export default STATE;

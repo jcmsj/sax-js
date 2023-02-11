@@ -3,7 +3,7 @@ import SAXParser from "./SAXParser";
 export { default as SAXParser } from "./SAXParser"
 import { SAXOptions } from "./types";
 export { type SAXOptions } from "./types";
-export function parser(strict: boolean, opt: SAXOptions) { return new SAXParser(strict, opt) }
+export default function parser(strict: boolean, opt: SAXOptions) { return new SAXParser(strict, opt) }
 // When we pass the MAX_BUFFER_LENGTH position, start checking for buffer overruns.
 // When we check, schedule the next check for MAX_BUFFER_LENGTH - (max(buffer lengths)),
 // since that's the earliest that a buffer overrun could occur.  This way, checks are
@@ -35,7 +35,7 @@ export const EVENTS = [
   'closenamespace'
 ]
 
-var streamWraps = EVENTS.filter(function (ev) {
+const streamWraps = EVENTS.filter(function (ev) {
   return ev !== 'error' && ev !== 'end'
 })
 
@@ -43,7 +43,7 @@ export function createStream(strict: boolean, opt: SAXOptions) {
   return new SAXStream(strict, opt)
 }
 
-class SAXStream extends ReadableStream {
+export class SAXStream extends ReadableStream {
   /**
    * @type {SAXParser}
    */
@@ -94,9 +94,6 @@ class SAXStream extends ReadableStream {
   }
 
   write(data: ArrayBuffer): boolean {
-    /* if (typeof Buffer === 'function' &&
-      typeof Buffer.isBuffer === 'function' &&
-      Buffer.isBuffer(data)) { */
     let decoded_data =  "";
     if (data instanceof ArrayBuffer && !this._decoder) {
       if (!this._decoder) {
@@ -109,24 +106,18 @@ class SAXStream extends ReadableStream {
     emit(this._parser, 'data', decoded_data);
     return true;
   }
-  /**
-   * @param {Buffer} chunk 
-   */
-  end(chunk) {
-    if (chunk && chunk.length) {
+  end(chunk:ArrayBuffer) {
+    if (chunk instanceof ArrayBuffer) {
       this.write(chunk);
     }
     this._parser.end();
     return true;
   }
-  on(ev: string, handler: Function) {
+  on(ev: string) {
     if (!this._parser['on' + ev] && streamWraps.includes(ev)) {
-      this._parser['on' + ev] = function () {
-        //const args = arguments.length === 1 ? [arguments[0]] : Array.apply(null, arguments);
-        //args.splice(0, 0, ev);
-        //me.emit.apply(me, args);
-        this._parser.emit(this._parser, [ev, ...arguments])
-      };
+      console.log(ev);
+      
+      this._parser['on' + ev] = this._parser.emit.bind(this, this._parser, [ev, ... arguments]);
     }
 
     //return super.on(this._parser, ev, handler)

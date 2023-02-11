@@ -16,7 +16,9 @@
     "noImplicitReturns": true,
     "skipLibCheck": true,
     "noImplicitAny": false,
-    "allowJs": true
+    "allowJs": true,
+    "baseUrl": ".",
+    "forceConsistentCasingInFileNames": true
   },
   "include": ["src", "lib"]
 }
