@@ -1,23 +1,21 @@
 import SAXParser, { emitNode, error, strictFail } from "./SAXParser"
 import { QualifiedName } from "./types"
 import STATE from "./State"
-export function newTag(p:SAXParser) {
+export function newTag(p: SAXParser) {
     if (!p.strict) p.tagName = p.tagName[p.looseCase]()
     const parent = p.tags[p.tags.length - 1] || p
-    const tag = p.tag = { name: p.tagName, attributes: {} }
+    p.tag = { name: p.tagName, attributes: {} }
 
     // will be overridden if tag contails an xmlns="foo" or xmlns:foo="bar"
     if (p.opt.xmlns) {
-        tag.ns = parent.ns
+        p.tag.ns = parent.ns
     }
     p.attribList.length = 0
-    emitNode(p, 'onopentagstart', tag)
+    emitNode(p, 'onopentagstart', p.tag)
 }
 
 export function qname(name: string, attribute?: any): QualifiedName {
-    const qualName = name.includes(":") ? ['', name] : name.split(':');
-    let prefix = qualName[0];
-    let local = qualName[1];
+    let [prefix, local] = name.includes(":") ? ['', name] : name.split(':');
 
     // <x "xmlns"="http://foo">
     if (attribute && name === 'xmlns') {
@@ -63,14 +61,14 @@ export function openTag(p: SAXParser, selfClosing: boolean = false) {
         // handle deferred onattribute events
         // Note: do not apply default ns to attributes:
         //   http://www.w3.org/TR/REC-xml-names/#defaulting
-        for (const[name, value] of p.attribList) {
-            const {prefix, local} = qname(name, true)
+        for (const [name, value] of p.attribList) {
+            const { prefix, local } = qname(name, true)
             const a = {
                 name,
                 value,
                 prefix,
                 local,
-                uri:prefix === '' ? '' : (tag.ns[prefix] || '')
+                uri: prefix === '' ? '' : (tag.ns[prefix] || '')
             }
 
             // if there's any attributes with an undefined namespace,
@@ -106,7 +104,7 @@ export function openTag(p: SAXParser, selfClosing: boolean = false) {
     p.attribList.length = 0
 }
 
-export function closeTag(parser:SAXParser) {
+export function closeTag(parser: SAXParser) {
     if (!parser.tagName) {
         strictFail(parser, 'Weird empty close tag.')
         parser.textNode += '</>'
@@ -132,15 +130,11 @@ export function closeTag(parser:SAXParser) {
     if (!parser.strict) {
         tagName = tagName[parser.looseCase]()
     }
-    const closeTo = tagName
-    while (t--) {
-        const close = parser.tags[t]
-        if (close.name !== closeTo) {
-            // fail the first time in strict mode
-            strictFail(parser, 'Unexpected close tag')
-        } else {
-            break
-        }
+
+    //Check closest tag
+    while (t-- && parser.tags[t].name !== tagName) {
+        // fail the first time in strict mode
+        strictFail(parser, 'Unexpected close tag')
     }
 
     // didn't find it.  we already failed for strict, so just abort.
@@ -151,8 +145,8 @@ export function closeTag(parser:SAXParser) {
         return
     }
     parser.tagName = tagName
-    let s = parser.tags.length
-    while (s-- > t) {
+
+    for (let i = parser.tags.length; i > t; i--) {
         const tag = parser.tag = parser.tags.pop()!;
         parser.tagName = parser.tag.name
         emitNode(parser, 'onclosetag', parser.tagName)
@@ -162,12 +156,12 @@ export function closeTag(parser:SAXParser) {
         const parent = parser.tags[parser.tags.length - 1] || parser
         if (parser.opt.xmlns && tag.ns !== parent.ns) {
             // remove namespace bindings introduced by tag
-            Object.keys(tag.ns).forEach(function (p) {
-                const n = tag.ns[p]
-                emitNode(parser, 'onclosenamespace', { prefix: p, uri: n })
+            Object.keys(tag.ns).forEach(prefix => {
+                emitNode(parser, 'onclosenamespace', { prefix, uri: tag.ns[prefix] })
             })
         }
     }
+
     if (t === 0) parser.closedRoot = true
     parser.tagName = parser.attribValue = parser.attribName = ''
     parser.attribList.length = 0
